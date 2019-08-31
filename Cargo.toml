@@ -7,7 +7,7 @@ description = "Data structures for spatial indexing"
 repository = "https://github.com/theZiggurat/spatial-rs.git"
 homepage = "https://github.com/theZiggurat/spatial-rs"
 license = "MIT/Apache-2.0"
-readme = "Readme.md
+readme = "Readme.md"
 keywords = ["spatial","quadtree"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
