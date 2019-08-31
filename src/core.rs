@@ -1,4 +1,8 @@
+#[allow(dead_code)]
+#[allow(non_snake_case)]
+
 use std::fmt;
+
 
 pub trait Spatial2D {
     fn x(&self) -> f32;

@@ -1,6 +1,7 @@
+
 use std::fmt;
 use std::marker::PhantomData;
-use crate::spatial::Spatial2D;
+use crate::core::Spatial2D;
 
 #[derive(Debug)]
 pub struct Quadtree<T> {
@@ -37,6 +38,12 @@ impl<T> Quadtree<T>
 
     pub fn insert(&mut self, data: T) {
         self.try_insert(data);
+    }
+
+    pub fn bounds(&self) -> Vec<Bounds> {
+        let mut vec = vec![];
+        self.root.get_bounds(&mut vec, self.bounds);
+        vec
     }
 }
 
@@ -126,15 +133,32 @@ impl<T> QuadtreeNode<T>
             }
         }
     }
+
+    pub fn get_bounds(&self, vec: &mut Vec<Bounds>, curr_bound: Bounds) {
+        match self {
+            QuadtreeNode::Branch(branch) => {
+                vec.push(curr_bound);
+                branch.TL.get_bounds(vec, curr_bound.sub_bound(Quadrant::TL));
+                branch.TR.get_bounds(vec, curr_bound.sub_bound(Quadrant::TR));
+                branch.BL.get_bounds(vec, curr_bound.sub_bound(Quadrant::BL));
+                branch.BR.get_bounds(vec, curr_bound.sub_bound(Quadrant::BR));
+            },
+            QuadtreeNode::Leaf(_) => {
+                vec.push(curr_bound);
+            },
+            QuadtreeNode::Empty => ()
+        }
+
+    }
 }
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Bounds {
-    x_min: f32,
-    x_max: f32,
-    y_min: f32,
-    y_max: f32,
+    pub x_min: f32,
+    pub x_max: f32,
+    pub y_min: f32,
+    pub y_max: f32,
 }
 
 impl Bounds {

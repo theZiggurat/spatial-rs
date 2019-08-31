@@ -1,8 +1,12 @@
+#[allow(dead_code)]
+#[allow(non_snake_case)]
+
+
 
 mod quad;
-mod spatial;
+mod core;
 pub use crate::quad::{Quadtree, Bounds, QuadtreeNode, Branch, Quadrant};
-pub use crate::spatial::{Spatial2D, Spatial3D, Point2D};
+pub use crate::core::{Spatial2D, Spatial3D, Point2D};
 
 #[cfg(test)]
 mod tests {
