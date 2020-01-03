@@ -58,11 +58,11 @@ impl LinearQuadTreeNode {
     /// quadtree nodes of equal level.
     /// These are NOT gaurenteed to exist within
     /// the datastructure and must be checked for existence
-    pub fn compute_neighbors() -> [Option<LinearQuadTreeNode>; 8] {
+    pub fn compute_neighbors(&self) -> [Option<LinearQuadTreeNode>; 8] {
         let mut ret = [None; 8];
 
-        let location = node.coordinate();
-        let level = node.level();
+        let location = self.coordinate();
+        let level = self.level();
 
         for i in 0..8 {
             let ni = location;
