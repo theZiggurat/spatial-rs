@@ -1,25 +1,22 @@
-use slotmap::Key;
-use hashbrown::HashMap;
-use crate::quadrant::Quadrant;
-use crate::Bounds;
+use crate::core::{Quadrant, Bounds};
 
-pub(crate) mod consts {
+mod consts {
     /// maximum depth of the tree using these nodes
     pub const RESOLUTION: u32 = 12;
     /// constant for neighbor calculation
-    pub const T_X: u32 = 0b010101010101010101010101;
+    pub const T_X: u32 = 0x555555;
     /// constant for neighbor calculation
-    pub const T_Y: u32 = 0b101010101010101010101010;
+    pub const T_Y: u32 = 0xAAAAAA;
     /// constants for neighbor calculation
     pub const DIRECTION_INCREMENTS: [u32; 8] = [
-        0b000000000000000000000001, // east
-        0b000000000000000000000011, // north-east
-        0b000000000000000000000010, // north
-        0b010101010101010101010111, // north-west
-        0b010101010101010101010101, // west
-        0b111111111111111111111111, // south-west
-        0b101010101010101010101010, // south
-        0b101010101010101010101011  // south-east
+        0x000001, // east
+        0x000003, // north-east
+        0x000002, // north
+        0x555557, // north-west
+        0x555555, // west
+        0xFFFFFF, // south-west
+        0xAAAAAA, // south
+        0xAAAAAB  // south-east
     ];
 }
 
@@ -29,15 +26,24 @@ pub(crate) mod consts {
 /// Based on the paper 'Finding Neighbors of Equal Size
 /// in Linear Quadtrees and Octrees in Constant Time'
 /// by Gunther Shrack (1991)
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct LinearQuadTreeNode {
-    /// [31:24]: level (8 bit unsigned)
-    /// [23:0]: location (12 2-bit pairs)
+    /// [31:28]: overflow | 4-bit unsigned
+    ///                   | values: 0-16
+    /// [27:24]: level    | 4 bit unsigned 
+    ///                   | values: 1-12
+    /// [23:0]: location  | 12 2-bit pairs 
+    ///                   | values: 12
     location: u32,
 }
 
-impl LinearQuadTreeNode {
+impl Default for LinearQuadTreeNode {
+    fn default() -> Self {
+        Self { location: 0 }
+    }
+}
 
+impl LinearQuadTreeNode {
     /// Creates new linear quad tree node based on location bits
     /// and level
     pub fn new(coordinate: u32, level: u32) -> LinearQuadTreeNode {
@@ -54,10 +60,10 @@ impl LinearQuadTreeNode {
         }
     }
 
-    /// Returns the location indexes of the 8 surrounding
-    /// quadtree nodes of equal level.
-    /// These are NOT gaurenteed to exist within
-    /// the datastructure and must be checked for existence
+    /// Returns the keys of the 8 surrounding
+    /// quadtree keys of equal level that may or may not exist.
+    /// within the linearquadtree instance but can be verified in
+    /// 0(1) time
     pub fn compute_neighbors(&self) -> [Option<LinearQuadTreeNode>; 8] {
         let mut ret = [None; 8];
 
@@ -74,12 +80,13 @@ impl LinearQuadTreeNode {
                 (((ni | consts::T_X) + (delta_ni & consts::T_Y)) & consts::T_Y);
 
             ret[i].replace(
-                Node::new(mi, level)
+                LinearQuadTreeNode::new(mi, level)
             );
         }
         ret
     }
 
+    #[inline(always)]
     pub fn quadrant_at_level(&self, level: u32) -> Quadrant {
         assert!(level < consts::RESOLUTION);
 
@@ -101,12 +108,96 @@ impl LinearQuadTreeNode {
         ret
     }
 
+    #[inline(always)]
     pub fn coordinate(&self) -> u32 {
         self.location & 0xFFFFFF
     }
 
+    #[inline(always)]
     pub fn level(&self) -> u32 {
-        self.location >> 24
+        self.location >> 24 & 0xF
+    }
+
+
+    /// Returns some overflow identifier for unique 
+    /// identification of keys that belong to the same
+    /// location
+    /// Or none if there is no overflow
+    #[inline(always)]
+    pub fn overflow(&self) -> Option<u32> {
+        let ret = self.location >> 28;
+        match ret {
+            1..=15 => Some(ret),
+            0 => None,
+            _ => unreachable!()
+        }
+    }
+
+    pub fn increment_overflow(&mut self) {
+        let overflow = self.overflow().unwrap_or(0) + 1;
+        assert_ne!(overflow, 16);
+        let mask = !(0xF << 28);
+        self.location = (self.location & mask) | overflow;
+    }
+
+    pub fn unit_bounds(&self) -> Bounds {
+        let mut bounds = Bounds::new(0., 0., 1., 1.);
+        for quadrant in self.coordinate_in_quadrants() {
+            bounds = bounds.sub_bound(quadrant);
+        }
+        bounds
+    }
+
+    /// mutates this key to represent further subdivision
+    /// of location based on input quadrant
+    /// (subset of self)
+    pub fn write_level(&mut self, quadrant: Quadrant){
+        let bits = match quadrant {
+            Quadrant::BL => 0b00,
+            Quadrant::BR => 0b01,
+            Quadrant::TL => 0b10,
+            Quadrant::TR => 0b11
+        } >> (self.level() * 2);
+
+        let mask = !(0b11 << (self.level() * 2));
+        self.location = (self.location & mask) | bits;
+
+        let bits = (self.level() + 1) << 24;
+        assert!(bits <= 12);
+
+        let mask = !(0xF << 24);
+        self.location = (self.location & mask) | bits;
+    }
+
+    /// mutates this key to represent location one level down
+    /// (superset of self)
+    pub fn remove_level(&mut self) {
+        let mask = !(0b11 << (self.level() * 2));
+        self.location = self.location & mask;
+
+        let bits = self.level().checked_sub(1).unwrap_or(0) << 24;
+        let mask = !(0xF << 24);
+        self.location = (self.location & mask) | bits;
+    }
+
+    /// returns new key that is one level deeper than self within
+    /// certain input quadrant. If resolution limit is reached, overflow
+    /// will be incremented
+    pub fn child(&self, quadrant: Quadrant) -> Self {
+        let ret = self.clone();
+        if ret.overflow().is_some() || ret.level() == consts::RESOLUTION {
+            ret.increment_overflow();
+        } else {
+            ret.write_level(quadrant);
+        }
+        ret
+    }
+
+    /// Returns new key that is one level above self
+    pub fn parent(&self) -> Self {
+        let ret = self.clone();
+        ret.remove_level();
+        ret
     }
 
 }
@@ -114,8 +205,7 @@ impl LinearQuadTreeNode {
 #[cfg(test)]
 mod test {
     use super::LinearQuadTreeNode;
-    use crate::Quadrant;
-    use slotmap::DefaultKey;
+    use crate::core::Quadrant;
 
     #[test]
     fn test_location_level() {
@@ -128,11 +218,11 @@ mod test {
 
         assert_eq!(node1, node2);
 
-        assert_eq!(node.quadrant_at_level(1), Quadrant::TR);
-        assert_eq!(node.quadrant_at_level(2), Quadrant::TL);
-        assert_eq!(node.quadrant_at_level(3), Quadrant::BR);
-        assert_eq!(node.quadrant_at_level(4), Quadrant::BL);
-        assert_eq!(node.level(), 7);
+        assert_eq!(node1.quadrant_at_level(1), Quadrant::TR);
+        assert_eq!(node1.quadrant_at_level(2), Quadrant::TL);
+        assert_eq!(node1.quadrant_at_level(3), Quadrant::BR);
+        assert_eq!(node1.quadrant_at_level(4), Quadrant::BL);
+        assert_eq!(node1.level(), 7);
     }
 
     #[test]
@@ -167,6 +257,18 @@ mod test {
                    vec![Quadrant::BR, Quadrant::BL], "south");
         assert_eq!(neighbors[7].unwrap().coordinate_in_quadrants(),
                    vec![Quadrant::BR, Quadrant::BR], "south-east");
+
+    }
+
+    #[test]
+    fn test_write_level() {
+        let mut node: LinearQuadTreeNode = Default::default();
+        node.write_level(Quadrant::BL);
+        assert_eq!(node.level(), 1);
+        node.write_level(Quadrant::BR);
+        assert_eq!(node.level(), 2);
+        assert_eq!(node.coordinate_in_quadrants(), 
+            vec![Quadrant::BL, Quadrant::BR]);
 
     }
 }
