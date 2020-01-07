@@ -12,7 +12,7 @@ pub trait Spatial2D {
     fn pos(&self) -> (f32, f32) {
         (self.x(), self.y())
     }
-    fn distance_from(&self, other: &dyn Spatial2D) -> f32 {
+    fn distance_to(&self, other: &dyn Spatial2D) -> f32 {
         let x = self.x() - other.x();
         let y = self.y() - other.y();
         ((x*x) + (y*y)).sqrt()
@@ -26,7 +26,7 @@ pub trait Spatial3D {
     fn loc(&self) -> (f32, f32, f32) {
         (self.x(), self.y(), self.z())
     }
-    fn distance_from(&self, other: &dyn Spatial3D) -> f32 {
+    fn distance_to(&self, other: &dyn Spatial3D) -> f32 {
         let x = self.x() - other.x();
         let y = self.y() - other.y();
         let z = self.z() - other.z();

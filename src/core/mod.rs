@@ -4,6 +4,6 @@ mod quadrant;
 mod types;
 
 pub use error::{SpatialError, Result};
-pub use quadrant::Quadrant;
-pub use types::{Spatial2D, Spatial3D};
+pub use quadrant::{Quadrant, QUADRANTS};
+pub use types::*;
 pub use bounds::Bounds;

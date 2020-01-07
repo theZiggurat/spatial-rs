@@ -58,17 +58,19 @@
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="CPPToolchains" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\Dev\spatial\src\pointer_quadtree" />
       <recent name="F:\Dev\spatial\src\linear_quadtree" />
       <recent name="F:\Dev\spatial\quadtree\src" />
       <recent name="F:\Dev\spatial\quadtree" />
       <recent name="F:\Dev\spatial\examples\quadtree" />
-      <recent name="F:\Dev\spatial\examples" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Cargo Command.linear_quadtree">
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     </configuration>
@@ -110,9 +112,48 @@
       <properties />
       <listeners />
     </configuration>
+    <configuration name="Run linear_quadtree" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="run --package spatial --example linear_quadtree" />
+      <option name="allFeatures" value="false" />
+      <option name="nocapture" value="true" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test linear_quadtree::linear_quadtree_key::test::test_parent_child" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package spatial --lib linear_quadtree::linear_quadtree_key::test::test_parent_child -- --exact" />
+      <option name="allFeatures" value="false" />
+      <option name="nocapture" value="true" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="run --example quadtree" />
+      <option name="allFeatures" value="false" />
+      <option name="nocapture" value="true" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="linear_quadtree" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="run --example linear_quadtree" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="true" />
       <option name="emulateTerminal" value="false" />
@@ -136,6 +177,18 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Cargo Command.quadtree" />
+      <item itemvalue="Cargo Command.linear_quadtree" />
+      <item itemvalue="Cargo Command.Run linear_quadtree" />
+      <item itemvalue="Cargo Command.Test linear_quadtree::linear_quadtree_key::test::test_parent_child" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo Command.Test linear_quadtree::linear_quadtree_key::test::test_parent_child" />
+        <item itemvalue="Cargo Command.Run linear_quadtree" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -169,6 +222,7 @@
       <workItem from="1568219059847" duration="2603000" />
       <workItem from="1568238155003" duration="22368000" />
       <workItem from="1578058109298" duration="22811000" />
+      <workItem from="1578283269482" duration="19490000" />
     </task>
     <servers />
   </component>
@@ -176,30 +230,60 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="914" height="171" key="GridCell.Tab.0.bottom" timestamp="1578085268693">
+    <state x="414" y="176" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1578268530099">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="914" height="171" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1578085268693" />
-    <state width="914" height="171" key="GridCell.Tab.0.center" timestamp="1578085268693">
+    <state x="414" y="176" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578268530099" />
+    <state x="765" y="237" key="#com.intellij.ide.util.MemberChooser" timestamp="1578263335336">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="914" height="171" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1578085268693" />
-    <state width="914" height="171" key="GridCell.Tab.0.left" timestamp="1578085268693">
+    <state x="765" y="237" key="#com.intellij.ide.util.MemberChooser/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578263335336" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1578283220174">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="914" height="171" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1578085268693" />
-    <state width="914" height="171" key="GridCell.Tab.0.right" timestamp="1578085268693">
+    <state x="740" y="275" key="FileChooserDialogImpl/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578283220174" />
+    <state width="838" height="912" key="GridCell.Tab.0.bottom" timestamp="1578412276316">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="914" height="171" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1578085268693" />
-    <state x="655" y="345" key="com.intellij.ide.util.TipDialog" timestamp="1578058114286">
+    <state width="914" height="171" key="GridCell.Tab.0.bottom/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578268450439" />
+    <state width="838" height="912" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1578412276316" />
+    <state width="838" height="912" key="GridCell.Tab.0.center" timestamp="1578412276316">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="914" height="171" key="GridCell.Tab.0.center/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578268450439" />
+    <state width="838" height="912" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1578412276316" />
+    <state width="838" height="912" key="GridCell.Tab.0.left" timestamp="1578412276316">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="914" height="171" key="GridCell.Tab.0.left/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578268450438" />
+    <state width="838" height="912" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1578412276316" />
+    <state width="838" height="912" key="GridCell.Tab.0.right" timestamp="1578412276316">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="914" height="171" key="GridCell.Tab.0.right/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578268450439" />
+    <state width="838" height="912" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1578412276316" />
+    <state x="461" y="163" key="SettingsEditor" timestamp="1578283290117">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="461" y="163" key="SettingsEditor/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578283290117" />
+    <state x="655" y="345" key="com.intellij.ide.util.TipDialog" timestamp="1578283268960">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="655" y="345" key="com.intellij.ide.util.TipDialog/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578283268960" />
     <state x="655" y="345" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1578058114286" />
     <state x="1072" y="69" width="736" height="909" key="find.popup" timestamp="1578082603438">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="1072" y="69" width="736" height="909" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1578082603438" />
+    <state x="616" y="240" key="run.anything.popup" timestamp="1578271383329">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="616" y="240" key="run.anything.popup/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578271383329" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1578328403453">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/-1920.0.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1578262236702" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1578328403453" />
   </component>
   <component name="masterDetails">
     <states>

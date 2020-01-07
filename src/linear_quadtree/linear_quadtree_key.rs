@@ -1,4 +1,5 @@
-use crate::core::{Quadrant, Bounds};
+use crate::core::{Quadrant, Bounds, Result, SpatialError};
+use std::fmt::{Formatter, Error};
 
 mod consts {
     /// maximum depth of the tree using these nodes
@@ -26,7 +27,7 @@ mod consts {
 /// Based on the paper 'Finding Neighbors of Equal Size
 /// in Linear Quadtrees and Octrees in Constant Time'
 /// by Gunther Shrack (1991)
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct LinearQuadTreeNode {
     /// [31:28]: overflow | 4-bit unsigned
     ///                   | values: 0-16
@@ -100,10 +101,15 @@ impl LinearQuadTreeNode {
         }
     }
 
+    #[inline(always)]
+    pub fn top_quadrant(&self) -> Quadrant {
+        self.quadrant_at_level(self.level())
+    }
+
     pub fn coordinate_in_quadrants(&self) -> Vec<Quadrant> {
         let mut ret = vec![];
-        for i in 0..self.level() {
-            ret.push(self.quadrant_at_level(i+1));
+        for i in 1..=self.level() {
+            ret.push(self.quadrant_at_level(i));
         }
         ret
     }
@@ -152,27 +158,28 @@ impl LinearQuadTreeNode {
     /// of location based on input quadrant
     /// (subset of self)
     pub fn write_level(&mut self, quadrant: Quadrant){
+
+        let bits = (self.level() + 1);
+        assert!(bits <= 12);
+
+        let mask = !(0xF << 24);
+        self.location = (self.location & mask) | (bits << 24);
+
         let bits = match quadrant {
             Quadrant::BL => 0b00,
             Quadrant::BR => 0b01,
             Quadrant::TL => 0b10,
             Quadrant::TR => 0b11
-        } >> (self.level() * 2);
+        } << ((12 - self.level()) * 2);
 
-        let mask = !(0b11 << (self.level() * 2));
-        self.location = (self.location & mask) | bits;
-
-        let bits = (self.level() + 1) << 24;
-        assert!(bits <= 12);
-
-        let mask = !(0xF << 24);
+        let mask = !(0b11 << ((12-self.level()) * 2));
         self.location = (self.location & mask) | bits;
     }
 
     /// mutates this key to represent location one level down
     /// (superset of self)
     pub fn remove_level(&mut self) {
-        let mask = !(0b11 << (self.level() * 2));
+        let mask = !(0b11 << ((12-self.level()) * 2));
         self.location = self.location & mask;
 
         let bits = self.level().checked_sub(1).unwrap_or(0) << 24;
@@ -181,26 +188,60 @@ impl LinearQuadTreeNode {
     }
 
     /// returns new key that is one level deeper than self within
-    /// certain input quadrant. If resolution limit is reached, overflow
-    /// will be incremented
-    pub fn child(&self, quadrant: Quadrant) -> Self {
-        let ret = self.clone();
-        if ret.overflow().is_some() || ret.level() == consts::RESOLUTION {
-            ret.increment_overflow();
+    /// certain input quadrant. If resolution limit is reached, function will
+    /// return a QuadtreeKeyOverflowError
+    pub fn child(&self, quadrant: Quadrant) -> crate::core::Result<Self> {
+        if self.overflow().is_some() || self.level() == consts::RESOLUTION {
+            Err(SpatialError::QuadtreeKeyOverflowError)
         } else {
+            let mut ret = self.clone();
             ret.write_level(quadrant);
+            Ok(ret)
+        }
+    }
+
+    /// Returns new key that is one level above self
+    pub fn parent(&self) -> Option<Self> {
+        if self.level() == 0 { return None; }
+        let mut ret = self.clone();
+        ret.remove_level();
+        Some(ret)
+    }
+
+    pub fn to_bounds(&self, spatial_bound: &Bounds) -> Bounds {
+        let mut ret = spatial_bound.clone();
+        for quadrant in self.coordinate_in_quadrants(){
+            ret = ret.sub_bound(quadrant);
         }
         ret
     }
 
-    /// Returns new key that is one level above self
-    pub fn parent(&self) -> Self {
-        let ret = self.clone();
-        ret.remove_level();
-        ret
-    }
-
 }
+
+impl std::fmt::Display for LinearQuadTreeNode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let vec = self.coordinate_in_quadrants();
+        let mut str = String::new();
+        for quadrant in vec {
+            str.push_str(match quadrant {
+                Quadrant::TL => "TL|",
+                Quadrant::BL => "BL|",
+                Quadrant::BR => "BR|",
+                Quadrant::TR => "TR|"
+            })
+        }
+        str.pop();
+        write!(f, "Key : coordinate: {}, level: {}, overflow: {}",
+               str, self.level(), self.overflow().unwrap_or(0))
+    }
+}
+
+impl std::fmt::Debug for LinearQuadTreeNode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Key {{ location: {:b} }}", self.location)
+    }
+}
+
 
 #[cfg(test)]
 mod test {
@@ -263,12 +304,37 @@ mod test {
     #[test]
     fn test_write_level() {
         let mut node: LinearQuadTreeNode = Default::default();
-        node.write_level(Quadrant::BL);
+        node.write_level(Quadrant::TL);
         assert_eq!(node.level(), 1);
-        node.write_level(Quadrant::BR);
+        node.write_level(Quadrant::TR);
         assert_eq!(node.level(), 2);
         assert_eq!(node.coordinate_in_quadrants(), 
-            vec![Quadrant::BL, Quadrant::BR]);
+            vec![Quadrant::TL, Quadrant::TR]);
+
+    }
+
+    #[test]
+    fn test_child() {
+        let node: LinearQuadTreeNode = Default::default();
+        let child1 = node.child(Quadrant::TL).unwrap();
+
+        assert_eq!(child1.coordinate(), 0b100000000000000000000000);
+        assert_eq!(child1.level(), 1);
+
+        let child2 = child1.child(Quadrant::TR).unwrap();
+
+        assert_eq!(child2.coordinate(), 0b101100000000000000000000);
+        assert_eq!(child2.level(), 2);
+    }
+
+    #[test]
+    fn test_parent_child() {
+        let node: LinearQuadTreeNode = Default::default();
+        let child1 = node.child(Quadrant::BR).unwrap();
+        let child2 = child1.child(Quadrant::TR).unwrap();
+
+        assert_eq!(child2.top_quadrant(), Quadrant::TR);
+        assert_eq!(child2.parent(), Some(child1));
 
     }
 }

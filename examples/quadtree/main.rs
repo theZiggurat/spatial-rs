@@ -3,7 +3,8 @@ use rand::prelude::*;
 use std::time::*;
 
 extern crate spatial;
-use spatial::*;
+use spatial::pointer_quadtree::*;
+use spatial::core::*;
 
 const SCREEN_WIDTH: u32 = 512;
 const SCREEN_HEIGHT: u32 = 512;
@@ -41,7 +42,7 @@ fn main() {
         WindowSettings::new("Quadtree demo!", [SCREEN_WIDTH, SCREEN_HEIGHT])
             .exit_on_esc(true).build().unwrap();
 
-    let mut quadtree = Quadtree::<Point>::new(Bounds::new(
+    let mut quadtree = PointerQuadtree::<Point>::new(Bounds::new(
         0., SCREEN_WIDTH as f32, 0., SCREEN_HEIGHT as f32));
 
     let mut rng = rand::thread_rng();
@@ -110,12 +111,12 @@ fn main() {
             clear([1.0; 4], graphics);
 
             // draw all points
-            for point in quadtree.values() {
-                rectangle([1.0, 0.0, 0.0, 1.0], // red
-                          [point.x() as f64, point.y() as f64, 5.0, 5.0],
-                          context.transform,
-                          graphics);
-            }
+//            for point in quadtree.values() {
+//                rectangle([1.0, 0.0, 0.0, 1.0], // red
+//                          [point.x() as f64, point.y() as f64, 5.0, 5.0],
+//                          context.transform,
+//                          graphics);
+//            }
 
             // draw bounds
             for (bound, _type) in quadtree.bounds_with_type() {

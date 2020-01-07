@@ -2,23 +2,22 @@
 use std::fmt;
 use std::marker::PhantomData;
 use slotmap::{SlotMap, DefaultKey, Values, ValuesMut};
-use crate::core::Spatial2D;
-use crate::quadrant::Quadrant;
+use crate::core::{Spatial2D, Bounds, Quadrant};
 
 const MAX_RECURCION: u32 = 8;
 
 #[derive(Debug)]
-pub struct Quadtree<T>
+pub struct PointerQuadtree<T>
     where T: Copy {
     container: SlotMap<DefaultKey, T>,
     root: QuadtreeNode<T>,
     pub bounds: Bounds
 }
 
-impl<T> Quadtree<T>
+impl<T> PointerQuadtree<T>
     where T: Copy {
     pub fn new(bounds: Bounds) -> Self {
-        Quadtree {
+        PointerQuadtree {
             container: SlotMap::new(),
             root: QuadtreeNode::Empty,
             bounds
@@ -26,7 +25,7 @@ impl<T> Quadtree<T>
     }
 }
 
-impl<T> Quadtree<T>
+impl<T> PointerQuadtree<T>
     where T: Spatial2D + Copy + PartialEq {
 
     pub fn try_insert(&mut self, data: T) {
@@ -78,7 +77,7 @@ impl<T> Quadtree<T>
 
     pub fn within(&self, p: &dyn Spatial2D, radius: f32) -> Vec<T> {
 
-        let mut vec = vec![];
+        let vec = vec![];
         let mut enclosing_bound = Bounds::new(
             p.x() - radius, p.x() + radius, p.y() - radius, p.y() + radius
         );

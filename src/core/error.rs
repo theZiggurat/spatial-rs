@@ -3,7 +3,8 @@ use std::error;
 
 #[derive(Debug)]
 pub enum SpatialError {
-    QuadtreeInsertError
+    QuadtreeInsertError,
+    QuadtreeKeyOverflowError,
 }
 
 pub type Result<T> = std::result::Result<T, SpatialError>;
